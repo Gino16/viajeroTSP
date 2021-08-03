@@ -77,9 +77,11 @@ def crearPunto():
 @app.route('/puntos', methods=['GET'])
 def getPuntos():
     puntos = Punto.query.all()
-    resultado = puntos_schema.dump(puntos)
-    print(puntos[0].nombre)
-    return jsonify(resultado)
+    if len(puntos) > 0:
+        resultado = puntos_schema.dump(puntos)
+        print(puntos[0].nombre)
+        return jsonify(resultado)
+    return jsonify({"message": "No existe puntos registrados"})
 
 
 # ------------ OBTENER RUTA OPTIMA ------------------ #
