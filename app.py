@@ -12,7 +12,7 @@ import array
 import random
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://b107b5db633e16:ca99dd01@us-cdbr-east-04.cleardb.com/heroku_f9d5738287ce501'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://bbbc511db8d449:e6f1c3ff@us-cdbr-east-04.cleardb.com/heroku_dcd450de6ec7181'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
