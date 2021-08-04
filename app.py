@@ -140,22 +140,17 @@ def getRuta():
     distance_map = calcular_distancias(puntos)
     IND_SIZE = len(puntos)
 
-    ruta, distancia = viajero(distance_map, IND_SIZE)
-    result = str(ruta).split('[')[2].split(']')[
-        0].split(',')  # capturando los indices
-    result = list(map(int, result))  # convirtiendo indices a enteros
-
-    for i in range(len(result)):  # sumando +1 a lista de indices porque empieza en 0 y en bd es 1
-        result[i] = result[i]+1
-
     puntos = Punto.query.all()  # Obteniendo todos los puntos de la bd
 
     rutaPuntos = []  # donde almacenaré la ruta a recorrer
 
-    for i in result:
-        for punto in puntos:
-            if punto.id == i:
-                rutaPuntos.append(punto)
+    ruta, distancia = viajero(distance_map, IND_SIZE)
+    ruta = str(ruta).split('[')[2].split(']')[0].split(',')  # capturando los indices
+    ruta = list(map(int, ruta))  # convirtiendo indices a enteros
+
+    for i in range(len(ruta)):
+        rutaPuntos.append(puntos[i])
+
 
     return jsonify({
         "ruta": puntos_schema.dump(rutaPuntos),
