@@ -6,13 +6,16 @@ from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
+from marshmallow.fields import String
 
 import numpy
 import array
 import random
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://bbbc511db8d449:e6f1c3ff@us-cdbr-east-04.cleardb.com/heroku_dcd450de6ec7181'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://bbbc511db8d449:e6f1c3ff@us-cdbr-east-04.cleardb.com/heroku_dcd450de6ec7181'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -20,10 +23,9 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 
-
 class Punto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), unique = True)
+    nombre = db.Column(db.String(100), unique=True)
     latitud = db.Column(db.Float)
     longitud = db.Column(db.Float)
 
@@ -31,15 +33,18 @@ class Punto(db.Model):
         self.nombre = nombre
         self.latitud = latitud
         self.longitud = longitud
-    
+
     def datos(self):
         return self.latitud, self.longitud
-    
+
+
 db.create_all()
+
 
 class PuntoSchema(ma.Schema):
     class Meta:
         fields = ('id', 'nombre', 'latitud', 'longitud')
+
 
 punto_schema = PuntoSchema()
 puntos_schema = PuntoSchema(many=True)
@@ -56,7 +61,6 @@ def calcular_distancias(puntos):
     return haversine_vector(arr_puntos, arr_puntos, Unit.METERS, comb=True)
 
 
-
 # ------------- REGISTRAR NUEVO PUNTO ---------------- #
 @app.route('/punto', methods=['POST'])
 def crearPunto():
@@ -68,9 +72,8 @@ def crearPunto():
 
     db.session.add(punto)
     db.session.commit()
-    
-    return punto_schema.jsonify(punto)
 
+    return punto_schema.jsonify(punto)
 
 
 # ------------- OBTENER TODOS LOS PUNTOS ---------------- #
@@ -84,6 +87,50 @@ def getPuntos():
     return jsonify({"message": "No existe puntos registrados"})
 
 
+# ------------ ALGORITMO VIAJERO --------------------#
+def viajero(distance_map, IND_SIZE):
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("Individual", array.array, typecode='I',
+                   fitness=creator.FitnessMin)
+
+    toolbox = base.Toolbox()
+
+    toolbox.register("indices", random.sample, range(IND_SIZE), IND_SIZE)
+
+    toolbox.register("individual", tools.initIterate,
+                     creator.Individual, toolbox.indices)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    def evalTSP(individual):
+        distance = distance_map[individual[-1]][individual[0]]
+        for gene1, gene2 in zip(individual[0:-1], individual[1:]):
+            distance += distance_map[gene1][gene2]
+        return distance,
+
+    toolbox.register("mate", tools.cxPartialyMatched)
+    toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
+    toolbox.register("select", tools.selTournament, tournsize=30)
+    toolbox.register("evaluate", evalTSP)
+
+    def main():
+        random.seed(169)
+
+        pop = toolbox.population(n=1000)
+
+        hof = tools.HallOfFame(1)
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("min", numpy.min)
+
+        algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats,
+                            halloffame=hof)
+
+        return hof
+
+    hof = main()
+
+    return hof, evalTSP(hof[0])
+
+
 # ------------ OBTENER RUTA OPTIMA ------------------ #
 @app.route('/ruta', methods=['GET'])
 def getRuta():
@@ -91,9 +138,27 @@ def getRuta():
     distance_map = calcular_distancias(puntos)
     IND_SIZE = len(puntos)
 
-    print(distance_map)
-    return jsonify(distance_map.tolist())
+    ruta, distancia = viajero(distance_map, IND_SIZE)
+    result = str(ruta).split('[')[2].split(']')[
+        0].split(',')  # capturando los indices
+    result = list(map(int, result))  # convirtiendo indices a enteros
 
+    for i in range(len(result)):  # sumando +1 a lista de indices porque empieza en 0 y en bd es 1
+        result[i] = result[i]+1
+
+    puntos = Punto.query.all()  # Obteniendo todos los puntos de la bd
+
+    rutaPuntos = []  # donde almacenaré la ruta a recorrer
+
+    for i in result:
+        for punto in puntos:
+            if punto.id == i:
+                rutaPuntos.append(punto)
+
+    return jsonify({
+        "ruta": puntos_schema.dump(rutaPuntos),
+        "distancia": distancia[0]
+    })
 
 
 # ------------------- MAIN -------------------- #
