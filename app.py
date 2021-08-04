@@ -151,7 +151,7 @@ def getRuta():
     for i in range(len(ruta)):
         rutaPuntos.append(puntos[i])
 
-
+    print(distance_map)
     return jsonify({
         "ruta": puntos_schema.dump(rutaPuntos),
         "distancia": distancia[0]
