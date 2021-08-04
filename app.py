@@ -6,13 +6,15 @@ from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
-from marshmallow.fields import String
+from flask_cors import CORS, cross_origin
+
 
 import numpy
 import array
 import random
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://bbbc511db8d449:e6f1c3ff@us-cdbr-east-04.cleardb.com/heroku_dcd450de6ec7181'
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
 
