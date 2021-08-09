@@ -158,6 +158,13 @@ def getRuta():
     })
 
 
+@app.route('/eliminar/<id>', methods=['DELETE'])
+def deletePuntp(id):
+    punto = Punto.query.get(id)
+    db.session.delete(punto)
+    db.session.commit()
+    return punto_schema.jsonify(punto)
+
 # ------------------- MAIN -------------------- #
 if __name__ == "__main__":
     app.run(debug=True)
