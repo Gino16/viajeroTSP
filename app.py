@@ -15,8 +15,8 @@ import random
 
 app = Flask(__name__)
 CORS(app)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
