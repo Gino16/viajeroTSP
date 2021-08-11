@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, json, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from haversine import haversine_vector, Unit
@@ -157,6 +157,19 @@ def getRuta():
         "distancia": distancia[0]
     })
 
+
+@app.route('/eliminar/<id>', methods=['DELETE'])
+def deletePunto(id):
+    punto = Punto.query.get(id)
+    db.session.delete(punto)
+    db.session.commit()
+    return punto_schema.jsonify(punto)
+
+@app.route('/elimintar/todo', methods=['DELETE'])
+def deleteAll():
+    db.session.delete()
+    db.session.commit()
+    return jsonify({"message": "Todos los registros eliminados"})
 
 # ------------------- MAIN -------------------- #
 if __name__ == "__main__":
