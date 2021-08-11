@@ -15,8 +15,8 @@ import random
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -165,9 +165,9 @@ def deletePunto(id):
     db.session.commit()
     return punto_schema.jsonify(punto)
 
-@app.route('/elimintar/todo', methods=['DELETE'])
+@app.route('/eliminar/todo', methods=['DELETE'])
 def deleteAll():
-    db.session.delete()
+    db.session.query(Punto).delete()
     db.session.commit()
     return jsonify({"message": "Todos los registros eliminados"})
 
