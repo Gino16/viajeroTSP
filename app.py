@@ -15,8 +15,8 @@ import random
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://doadmin:g2ww71b2e2xc8uq5@db-mysql-nyc3-78162-do-user-9244204-0.b.db.ondigitalocean.com:25060/viajerotsp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/viajerotsp'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -149,9 +149,8 @@ def getRuta():
     ruta = list(map(int, ruta))  # convirtiendo indices a enteros
 
     for i in range(len(ruta)):
-        rutaPuntos.append(puntos[i])
+        rutaPuntos.append(puntos[ruta[i]])
 
-    print(distance_map)
     return jsonify({
         "ruta": puntos_schema.dump(rutaPuntos),
         "distancia": distancia[0]
